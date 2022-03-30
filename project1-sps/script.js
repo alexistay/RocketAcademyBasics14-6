@@ -8,13 +8,8 @@ const RSTONE = "reversed stone";
 var getComputerChoice = function () {
   var randomDecimal = Math.random() * 3;
   var randomInteger = Math.floor(randomDecimal);
-  if (randomInteger === 0) {
-    return SCISSORS;
-  } else if (randomInteger === 1) {
-    return PAPER;
-  } else {
-    return STONE;
-  }
+  var options = [SCISSORS, PAPER, STONE];
+  return options[randomInteger];
 };
 
 var isDraw = function (x, y) {
@@ -22,7 +17,7 @@ var isDraw = function (x, y) {
 };
 
 var doesXWinY = function (x, y) {
-  // only allows reversed in x
+  // only allow reversed in x
   return (
     (x === SCISSORS && y === PAPER) ||
     (x === PAPER && y === STONE) ||
@@ -78,7 +73,7 @@ var main = function (input) {
   } else if (doesXWinY(input, computerChoice)) {
     output += "You win. ✌️";
   } else {
-    output += "Computer win. 😥";
+    output += "Computer wins. 😥";
   }
   return output;
 };
