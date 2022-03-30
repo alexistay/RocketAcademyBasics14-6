@@ -1,6 +1,9 @@
 const SCISSORS = "scissors";
 const PAPER = "paper";
 const STONE = "stone";
+const RSCISSORS = "reversed scissors";
+const RPAPER = "reversed paper";
+const RSTONE = "reversed stone";
 
 var getComputerChoice = function () {
   var randomDecimal = Math.random() * 3;
@@ -15,14 +18,18 @@ var getComputerChoice = function () {
 };
 
 var isDraw = function (x, y) {
-  return x === y;
+  return x === y || x === "reversed " + y || "reversed " + x === y;
 };
 
 var doesXWinY = function (x, y) {
+  // only allows reversed in x
   return (
     (x === SCISSORS && y === PAPER) ||
     (x === PAPER && y === STONE) ||
-    (x === STONE && y === SCISSORS)
+    (x === STONE && y === SCISSORS) ||
+    (x === RSCISSORS && y === STONE) ||
+    (x === RPAPER && y === SCISSORS) ||
+    (x === RSTONE && y === PAPER)
   );
 };
 
@@ -33,16 +40,31 @@ var getEmoji = function (choice) {
     return "📄";
   } else if (choice === STONE) {
     return "🪨";
+  } else if (choice === RSCISSORS) {
+    return "◀️✂️";
+  } else if (choice === RPAPER) {
+    return "◀️📄";
+  } else if (choice === RSTONE) {
+    return "◀️🪨";
+  } else {
+    return "❓";
   }
 };
 var isValidInput = function (input) {
-  return input === SCISSORS || input === PAPER || input === STONE;
+  return (
+    input === SCISSORS ||
+    input === PAPER ||
+    input === STONE ||
+    input === RSCISSORS ||
+    input === RPAPER ||
+    input === RSTONE
+  );
 };
 
 var main = function (input) {
   var output;
   if (!isValidInput(input)) {
-    return "Invalid input.<br>Enter either scissors paper or stone";
+    return "Invalid input.<br>Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
   }
 
   var computerChoice = getComputerChoice();
@@ -53,10 +75,10 @@ var main = function (input) {
 
   if (isDraw(computerChoice, input)) {
     output += "It's a draw!";
-  } else if (doesXWinY(computerChoice, input)) {
-    output += "Computer wins!";
+  } else if (doesXWinY(input, computerChoice)) {
+    output += "You win. ✌️";
   } else {
-    output += "You win!";
+    output += "Computer win. 😥";
   }
   return output;
 };
