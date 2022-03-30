@@ -26,6 +26,15 @@ var doesXWinY = function (x, y) {
   );
 };
 
+var getEmoji = function (choice) {
+  if (choice === SCISSORS) {
+    return "✂️";
+  } else if (choice === PAPER) {
+    return "📄";
+  } else if (choice === STONE) {
+    return "🪨";
+  }
+};
 var isValidInput = function (input) {
   return input === SCISSORS || input === PAPER || input === STONE;
 };
@@ -37,8 +46,10 @@ var main = function (input) {
   }
 
   var computerChoice = getComputerChoice();
-  output = `The computer chose ${computerChoice}.<br>`;
-  output += `You chose ${input}.<br><br>`;
+  output = `The computer chose ${computerChoice}${getEmoji(
+    computerChoice
+  )}.<br>`;
+  output += `You chose ${input}${getEmoji(input)}.<br><br>`;
 
   if (isDraw(computerChoice, input)) {
     output += "It's a draw!";
