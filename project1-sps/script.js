@@ -5,6 +5,13 @@ const RSCISSORS = "reversed scissors";
 const RPAPER = "reversed paper";
 const RSTONE = "reversed stone";
 
+var numDraw = 0;
+var numWin = 0;
+var numLoss = 0;
+
+var mode = "name";
+var username;
+
 var getComputerChoice = function () {
   var randomDecimal = Math.random() * 3;
   var randomInteger = Math.floor(randomDecimal);
@@ -45,6 +52,7 @@ var getEmoji = function (choice) {
     return "❓";
   }
 };
+
 var isValidInput = function (input) {
   return (
     input === SCISSORS ||
@@ -58,22 +66,35 @@ var isValidInput = function (input) {
 
 var main = function (input) {
   var output;
-  if (!isValidInput(input)) {
-    return "Invalid input.<br>Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
-  }
 
-  var computerChoice = getComputerChoice();
-  output = `The computer chose ${computerChoice}${getEmoji(
-    computerChoice
-  )}.<br>`;
-  output += `You chose ${input}${getEmoji(input)}.<br><br>`;
-
-  if (isDraw(computerChoice, input)) {
-    output += "It's a draw!";
-  } else if (doesXWinY(input, computerChoice)) {
-    output += "You win. ✌️";
+  if (mode === "name") {
+    username = input;
+    mode = "play";
+    output =
+      "Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
   } else {
-    output += "Computer wins. 😥";
+    if (!isValidInput(input)) {
+      return "Invalid input.<br>Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
+    }
+
+    var computerChoice = getComputerChoice();
+    output = `The computer chose ${computerChoice}${getEmoji(
+      computerChoice
+    )}.<br>`;
+    output += `You chose ${input}${getEmoji(input)}.<br><br>`;
+
+    if (isDraw(computerChoice, input)) {
+      output += "It's a draw!";
+      numDraw++;
+    } else if (doesXWinY(input, computerChoice)) {
+      output += "You win. ✌️";
+      numWin++;
+    } else {
+      output += "Computer wins. 😥";
+      numLoss++;
+    }
+
+    output += `<br>${username}, you have ${numWin} wins, ${numDraw} draws and ${numLoss} losses. `;
   }
   return output;
 };
