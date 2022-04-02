@@ -4,6 +4,8 @@ const STONE = "stone";
 const RSCISSORS = "reversed scissors";
 const RPAPER = "reversed paper";
 const RSTONE = "reversed stone";
+const OPTIONS =
+  "Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
 
 var numDraw = 0;
 var numWin = 0;
@@ -70,11 +72,10 @@ var main = function (input) {
   if (mode === "name") {
     username = input;
     mode = "play";
-    output =
-      "Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
+    output = OPTIONS;
   } else {
     if (!isValidInput(input)) {
-      return "Invalid input.<br>Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
+      return `Invalid input.<br><br>${OPTIONS}`;
     }
 
     var computerChoice = getComputerChoice();
@@ -95,6 +96,7 @@ var main = function (input) {
     }
 
     output += `<br>${username}, you have ${numWin} wins, ${numDraw} draws and ${numLoss} losses. `;
+    output += `<br><br>${OPTIONS} to play again.`;
   }
   return output;
 };
