@@ -10,8 +10,8 @@ const RSTONE = "reversed stone";
 const SPSOPTIONS =
   "Enter either 'scissors', 'paper', 'stone', 'reversed scissors', 'reversed paper' or 'reversed stone'";
 const RPSLSOPTIONS =
-  "Enter either 'rock', 'paper', 'scissors', 'lizard' or 'Spock'" +
-  "<BR><BR>Remember, scissors cuts paper, paper covers rock, rock crushes lizard, lizard poisons Spock, Spock smashes scissors, scissors decapitates lizard, lizard eats paper, paper disproves Spock, Spock vaporizes rock, and as it always has, rock crushes scissors.";
+  "Remember, scissors cuts paper, paper covers rock, rock crushes lizard, lizard poisons Spock, Spock smashes scissors, scissors decapitates lizard, lizard eats paper, paper disproves Spock, Spock vaporizes rock, and as it always has, rock crushes scissors." +
+  "<BR><BR>Enter either 'rock', 'paper', 'scissors', 'lizard' or 'Spock'";
 const GAMEOPTIONS =
   "Choose which game you want to play. Enter [1] or [2]:" +
   "<BR>1. Scissors paper stone" +
@@ -236,7 +236,11 @@ var playGame = function (input) {
     numLoss++;
   }
 
-  output += `<br><br>${username}, you have ${numWin} wins, ${numDraw} draws and ${numLoss} losses. `;
+  output += `<br><br>${username}, you have ${numWin} win${
+    numWin > 1 ? "s" : ""
+  }, ${numDraw} draw${numDraw > 1 ? "s" : ""} and ${numLoss} loss${
+    numLoss > 1 ? "es" : ""
+  }. `;
 
   output += `<br><br>${options} to play again.`;
   return output;
