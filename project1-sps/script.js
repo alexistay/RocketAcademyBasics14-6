@@ -229,10 +229,10 @@ var playGame = function (input) {
     output += "It's a draw!";
     numDraw++;
   } else if (doesXWinY(input, computerChoice)) {
-    output += "You win. ✌️";
+    output += "You win. <span style='font-size: x-large;'>✌️</span>";
     numWin++;
   } else {
-    output += "Computer wins. 😥";
+    output += "Computer wins. <span style='font-size: x-large;'>😥</span>";
     numLoss++;
   }
 
@@ -256,7 +256,6 @@ var processGameChoice = function (input) {
     mode = MODERPSLS;
     return RPSLSOPTIONS;
   }
-  console.log("as");
 };
 
 var main = function (input) {
