@@ -66,37 +66,48 @@ var isValidInput = function (input) {
   );
 };
 
+var processName = function (input) {
+  username = input;
+  mode = "play";
+  return OPTIONS;
+};
+
+var playGame = function (input) {
+  var output;
+  if (!isValidInput(input)) {
+    return `Invalid input.<br><br>${OPTIONS}`;
+  }
+
+  var computerChoice = getComputerChoice();
+  output = `The computer chose ${computerChoice}${getEmoji(
+    computerChoice
+  )}.<br>`;
+  output += `You chose ${input}${getEmoji(input)}.<br><br>`;
+
+  if (isDraw(computerChoice, input)) {
+    output += "It's a draw!";
+    numDraw++;
+  } else if (doesXWinY(input, computerChoice)) {
+    output += "You win. ✌️";
+    numWin++;
+  } else {
+    output += "Computer wins. 😥";
+    numLoss++;
+  }
+
+  output += `<br>${username}, you have ${numWin} wins, ${numDraw} draws and ${numLoss} losses. `;
+  output += `<br><br>${OPTIONS} to play again.`;
+
+  return output;
+};
+
 var main = function (input) {
   var output;
 
   if (mode === "name") {
-    username = input;
-    mode = "play";
-    output = OPTIONS;
+    output = processName(input);
   } else {
-    if (!isValidInput(input)) {
-      return `Invalid input.<br><br>${OPTIONS}`;
-    }
-
-    var computerChoice = getComputerChoice();
-    output = `The computer chose ${computerChoice}${getEmoji(
-      computerChoice
-    )}.<br>`;
-    output += `You chose ${input}${getEmoji(input)}.<br><br>`;
-
-    if (isDraw(computerChoice, input)) {
-      output += "It's a draw!";
-      numDraw++;
-    } else if (doesXWinY(input, computerChoice)) {
-      output += "You win. ✌️";
-      numWin++;
-    } else {
-      output += "Computer wins. 😥";
-      numLoss++;
-    }
-
-    output += `<br>${username}, you have ${numWin} wins, ${numDraw} draws and ${numLoss} losses. `;
-    output += `<br><br>${OPTIONS} to play again.`;
+    output = playGame(input);
   }
   return output;
 };
