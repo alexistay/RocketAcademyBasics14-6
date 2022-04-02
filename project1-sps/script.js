@@ -127,11 +127,12 @@ var getChoiceText = function (choice) {
   );
 };
 
+// gives the outcome string for choices x & y
+// returns empty string if choices are not x & y
+// returns outcome string if choices are x & y, checking for both sides
+
 var test1Output = function (choice1, choice2, x, y, outcome) {
-  if (choice1 === x && choice2 === y) {
-    return outcome;
-  }
-  if (choice1 === y && choice2 === x) {
+  if ((choice1 === x && choice2 === y) || (choice1 === y && choice2 === x)) {
     return outcome;
   }
   return "";
