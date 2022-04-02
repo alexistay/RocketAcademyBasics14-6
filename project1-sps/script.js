@@ -38,21 +38,21 @@ var doesXWinY = function (x, y) {
 };
 
 var getEmoji = function (choice) {
-  if (choice === SCISSORS) {
-    return "✂️";
-  } else if (choice === PAPER) {
-    return "📄";
-  } else if (choice === STONE) {
-    return "🪨";
-  } else if (choice === RSCISSORS) {
-    return "◀️✂️";
-  } else if (choice === RPAPER) {
-    return "◀️📄";
-  } else if (choice === RSTONE) {
-    return "◀️🪨";
-  } else {
-    return "❓";
+  var emoji = "";
+  if (choice.substr(0, "reversed".length) === "reversed") {
+    emoji += "◀️";
+    choice = choice.replace("reversed ", "");
   }
+  if (choice === SCISSORS) {
+    emoji += "✂️";
+  } else if (choice === PAPER) {
+    emoji += "📄";
+  } else if (choice === STONE) {
+    emoji += "🥌";
+  } else {
+    emoji += "❓";
+  }
+  return emoji;
 };
 
 var isValidInput = function (input) {
