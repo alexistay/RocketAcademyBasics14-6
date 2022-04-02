@@ -218,7 +218,7 @@ var playGame = function (input) {
   }
 
   if (!isValidInput(input)) {
-    return `Invalid input.<br><br>${options}`;
+    return `Invalid input.<br><br>${options}.`;
   }
 
   var computerChoice = getComputerChoice();
@@ -252,13 +252,11 @@ var processGameChoice = function (input) {
     return "Invalid choice. <BR><BR>" + GAMEOPTIONS;
   }
   if (input === 1) {
-    console.log("1");
     mode = MODESPS;
-    return SPSOPTIONS;
+    return SPSOPTIONS + ".";
   } else if (input === 2) {
-    console.log("2");
     mode = MODERPSLS;
-    return RPSLSOPTIONS;
+    return RPSLSOPTIONS + ".";
   }
 };
 
