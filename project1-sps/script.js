@@ -222,8 +222,8 @@ var playGame = function (input) {
   }
 
   var computerChoice = getComputerChoice();
-  output = `The computer chose ${getChoiceText(computerChoice)}.<br>`;
-  output += `You chose ${getChoiceText(input)}.<br><br>`;
+  output = `The computer chose ${getChoiceText(computerChoice)}.`;
+  output += ` You chose ${getChoiceText(input)}.<br><br>`;
   output += getOutcomeText(input, computerChoice) + "<br>";
   if (isDraw(computerChoice, input)) {
     output += "It's a draw!";
