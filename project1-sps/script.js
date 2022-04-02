@@ -106,11 +106,7 @@ var isValidInput = function (input) {
     );
   } else if (mode === MODERPSLS) {
     return (
-      input === ROCK ||
-      input === PAPER ||
-      input === SCISSORS ||
-      input === LIZARD ||
-      input === SPOCK
+      input === ROCK || input === PAPER || input === SCISSORS || input === LIZARD || input === SPOCK
     );
   }
 };
@@ -122,16 +118,14 @@ var processName = function (input) {
 };
 
 var getChoiceText = function (choice) {
-  return (
-    choice + "<span style='font-size: x-large;'>" + getEmoji(choice) + "</span>"
-  );
+  return choice + "<span style='font-size: x-large;'>" + getEmoji(choice) + "</span>";
 };
 
-// gives the outcome string for choices x & y
+// tests whether choices are x & y and gives the outcome string
 // returns empty string if choices are not x & y
 // returns outcome string if choices are x & y, checking for both sides
 
-var test1Output = function (choice1, choice2, x, y, outcome) {
+var test1Outcome = function (choice1, choice2, x, y, outcome) {
   if ((choice1 === x && choice2 === y) || (choice1 === y && choice2 === x)) {
     return outcome;
   }
@@ -142,68 +136,26 @@ var getOutcomeText = function (x, y) {
   var output = "";
 
   if (mode === MODESPS) {
-    output += test1Output(x, y, SCISSORS, PAPER, "Scissors cuts paper.");
-    output += test1Output(x, y, PAPER, STONE, "Paper wraps stone.");
-    output += test1Output(x, y, STONE, SCISSORS, "Stone crushes scissors.");
-    output += test1Output(
-      x,
-      y,
-      RSCISSORS,
-      PAPER,
-      "Reversed - Scissors does not cut paper."
-    );
-    output += test1Output(
-      x,
-      y,
-      RPAPER,
-      STONE,
-      "Reversed - Paper does not wrap stone."
-    );
-    output += test1Output(
-      x,
-      y,
-      RSTONE,
-      SCISSORS,
-      "Reversed - Stone does not crush scissors."
-    );
-    output += test1Output(
-      x,
-      y,
-      SCISSORS,
-      RPAPER,
-      "Reversed - Scissors does not cut paper."
-    );
-    output += test1Output(
-      x,
-      y,
-      PAPER,
-      RSTONE,
-      "Reversed - Paper does not wrap stone."
-    );
-    output += test1Output(
-      x,
-      y,
-      STONE,
-      RSCISSORS,
-      "Reversed - Stone does not crushe scissors."
-    );
+    output += test1Outcome(x, y, SCISSORS, PAPER, "Scissors cuts paper.");
+    output += test1Outcome(x, y, PAPER, STONE, "Paper wraps stone.");
+    output += test1Outcome(x, y, STONE, SCISSORS, "Stone crushes scissors.");
+    output += test1Outcome(x, y, RSCISSORS, PAPER, "Reversed - Scissors does not cut paper.");
+    output += test1Outcome(x, y, RPAPER, STONE, "Reversed - Paper does not wrap stone.");
+    output += test1Outcome(x, y, RSTONE, SCISSORS, "Reversed - Stone does not crush scissors.");
+    output += test1Outcome(x, y, SCISSORS, RPAPER, "Reversed - Scissors does not cut paper.");
+    output += test1Outcome(x, y, PAPER, RSTONE, "Reversed - Paper does not wrap stone.");
+    output += test1Outcome(x, y, STONE, RSCISSORS, "Reversed - Stone does not crushe scissors.");
   } else if (mode === MODERPSLS) {
-    output += test1Output(x, y, SCISSORS, PAPER, "Scissors cuts paper.");
-    output += test1Output(x, y, PAPER, ROCK, "Paper covers rock.");
-    output += test1Output(x, y, ROCK, LIZARD, "Rock crushes lizard.");
-    output += test1Output(x, y, LIZARD, SPOCK, "Lizard poisons Spock.");
-    output += test1Output(x, y, SPOCK, SCISSORS, "Spock smashes scissors.");
-    output += test1Output(
-      x,
-      y,
-      SCISSORS,
-      LIZARD,
-      "Scissors decapitates lizard."
-    );
-    output += test1Output(x, y, LIZARD, PAPER, "Lizard eats paper.");
-    output += test1Output(x, y, PAPER, SPOCK, "Paper disproves Spock.");
-    output += test1Output(x, y, SPOCK, ROCK, "Spock vaporizes rock.");
-    output += test1Output(x, y, ROCK, SCISSORS, "Rock crushes scissors.");
+    output += test1Outcome(x, y, SCISSORS, PAPER, "Scissors cuts paper.");
+    output += test1Outcome(x, y, PAPER, ROCK, "Paper covers rock.");
+    output += test1Outcome(x, y, ROCK, LIZARD, "Rock crushes lizard.");
+    output += test1Outcome(x, y, LIZARD, SPOCK, "Lizard poisons Spock.");
+    output += test1Outcome(x, y, SPOCK, SCISSORS, "Spock smashes scissors.");
+    output += test1Outcome(x, y, SCISSORS, LIZARD, "Scissors decapitates lizard.");
+    output += test1Outcome(x, y, LIZARD, PAPER, "Lizard eats paper.");
+    output += test1Outcome(x, y, PAPER, SPOCK, "Paper disproves Spock.");
+    output += test1Outcome(x, y, SPOCK, ROCK, "Spock vaporizes rock.");
+    output += test1Outcome(x, y, ROCK, SCISSORS, "Rock crushes scissors.");
   }
   return output;
 };
@@ -236,11 +188,9 @@ var playGame = function (input) {
     numLoss++;
   }
 
-  output += `<br><br>${username}, you have ${numWin} win${
-    numWin > 1 ? "s" : ""
-  }, ${numDraw} draw${numDraw > 1 ? "s" : ""} and ${numLoss} loss${
-    numLoss > 1 ? "es" : ""
-  }. `;
+  output += `<br><br>${username}, you have ${numWin} win${numWin > 1 ? "s" : ""}, ${numDraw} draw${
+    numDraw > 1 ? "s" : ""
+  } and ${numLoss} loss${numLoss > 1 ? "es" : ""}. `;
 
   output += `<br><br>${options} to play again.`;
   return output;
