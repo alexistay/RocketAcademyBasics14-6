@@ -138,7 +138,7 @@ var test1Output = function (choice1, choice2, x, y, outcome) {
   return "";
 };
 
-var getOutputText = function (x, y) {
+var getOutcomeText = function (x, y) {
   var output = "";
 
   if (mode === MODESPS) {
@@ -224,7 +224,7 @@ var playGame = function (input) {
   var computerChoice = getComputerChoice();
   output = `The computer chose ${getChoiceText(computerChoice)}.<br>`;
   output += `You chose ${getChoiceText(input)}.<br><br>`;
-  output += getOutputText(input, computerChoice) + "<br>";
+  output += getOutcomeText(input, computerChoice) + "<br>";
   if (isDraw(computerChoice, input)) {
     output += "It's a draw!";
     numDraw++;
