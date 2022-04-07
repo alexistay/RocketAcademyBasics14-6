@@ -2,13 +2,13 @@ var getRandomWord = function (input) {
   var randomDecimal = Math.random() * 3;
   var randomInteger = Math.floor(randomDecimal);
 
-  if (randomInteger == 0) {
+  if (randomInteger === 0) {
     return "banana";
   }
-  if (randomInteger == 1) {
+  if (randomInteger === 1) {
     return "chisel";
   }
-  if (randomInteger == 2) {
+  if (randomInteger === 2) {
     return "faucet";
   }
 };
