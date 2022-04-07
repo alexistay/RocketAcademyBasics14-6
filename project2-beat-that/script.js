@@ -11,6 +11,8 @@ var getValueFromChoice = function (choice) {
     return dice1 * 10 + dice2;
   } else if (choice === "2") {
     return dice2 * 10 + dice1;
+  } else {
+    return 0;
   }
 };
 
@@ -23,6 +25,7 @@ var getResults = function () {
   } else {
     output += "It's a draw.";
   }
+  output += "<br><br>Player 1 - Click 'Submit' to roll your dice.";
   return output;
 };
 
@@ -34,19 +37,23 @@ var main = function (input) {
     return `Player ${player}, you have rolled -<br>dice1: ${dice1}<br>dice2: ${dice2}. <br><br>Which dice first? Enter [1] or [2]`;
   } else if (state === "choose") {
     var value = getValueFromChoice(input);
+    if (value === 0) {
+      return `Player ${player}, you have rolled -<br>dice1: ${dice1}<br>dice2: ${dice2}. <br><br>Which dice first? Enter [1] or [2]`;
+    }
     if (player === 1) {
       player1 = value;
     } else {
       player2 = value;
     }
-
     if (player === 1) {
       state = "roll";
       player = 2;
       return 'Player 2 - Click "Submit" to roll your dice.';
     } else if (player === 2) {
       var output = getResults();
-      state = "1roll";
+      state = "roll";
+      player = 1;
+
       return output;
     }
   }
