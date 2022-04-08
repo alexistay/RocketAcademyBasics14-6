@@ -1,16 +1,23 @@
 var state = "roll"; // or choose
 var player = 1; // or 2
-var dice1, dice2, player1, player2;
+var dices, player1, player2;
 
 var rollDice = function () {
   return Math.ceil(Math.random() * 6);
 };
 
+var getDices = function (numDice) {
+  var dices = [];
+  for (let i = 0; i < numDice; i++) {
+    dices.push(rollDice());
+  }
+  return dices;
+};
 var getValueFromChoice = function (choice) {
   if (choice === "1") {
-    return dice1 * 10 + dice2;
+    return dices[0] * 10 + dices[1];
   } else if (choice === "2") {
-    return dice2 * 10 + dice1;
+    return dices[1] * 10 + dices[0];
   } else {
     return 0;
   }
@@ -31,14 +38,13 @@ var getResults = function () {
 
 var main = function (input) {
   if (state === "roll") {
-    dice1 = rollDice();
-    dice2 = rollDice();
+    dices = getDices(2);
     state = "choose";
-    return `Player ${player}, you have rolled -<br>dice1: ${dice1}<br>dice2: ${dice2}. <br><br>Which dice first? Enter [1] or [2]`;
+    return `Player ${player}, you have rolled -<br>dice1: ${dices[0]}<br>dice2: ${dices[1]}. <br><br>Which dice first? Enter [1] or [2]`;
   } else if (state === "choose") {
     var value = getValueFromChoice(input);
     if (value === 0) {
-      return `Player ${player}, you have rolled -<br>dice1: ${dice1}<br>dice2: ${dice2}. <br><br>Which dice first? Enter [1] or [2]`;
+      return `Player ${player}, you have rolled -<br>dice1: ${dices[0]}<br>dice2: ${dices[1]}. <br><br>Which dice first? Enter [1] or [2]`;
     }
     if (player === 1) {
       player1 = value;
