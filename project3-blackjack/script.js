@@ -1,6 +1,7 @@
 const STATEDEAL = "DEAL";
 const STATEPLAYERHITSTAND = "STATEPLAYERHITSTAND";
 const STATECOMPUTERHITSTAND = "STATECOMPUTERHITSTAND";
+const STATERESULT = "STATERESULT";
 const HEARTS = "Hearts";
 const DIAMONDS = "Diamonds";
 const CLUBS = "Clubs";
@@ -142,6 +143,8 @@ var displayCards = function (cards, hideFirstCard) {
     return cards.map(getCardEmoji).join(" ");
   } else {
     // hide first card
+    // do a deep copy of the cards array so that we can change the first card temporaily
+    // https://stackoverflow.com/questions/597588/how-do-you-clone-an-array-of-objects-in-javascript
     var hiddenCards = JSON.parse(JSON.stringify(cards));
     hiddenCards[0].name = "Backside";
     hiddenCards[0].suit = "";
@@ -156,6 +159,7 @@ var displayPlayerHand = function () {
 var displayComputerHand = function (hideFirstCard) {
   var text = `Computer hand:`;
   if (!hideFirstCard) {
+    // show points if not hiding first card
     text += `[${getHandValue(computerCards)} points]`;
   }
   text += `<br>${displayCards(computerCards, hideFirstCard)}`;
@@ -187,6 +191,7 @@ var hasAce = function (cards) {
   }
   return false;
 };
+
 var isBlackjack = function (cards) {
   return cards.length === 2 && hasAce(cards) && getHandValue(cards) === 21;
 };
@@ -207,6 +212,7 @@ var getHandValue = function (cards) {
     }
   }
 
+  // if busted, convert aces from 11 to 1 if possible until value <21
   while (value > 21 && numAces > 0) {
     value -= 10;
     numAces--;
@@ -272,6 +278,7 @@ var hideHitStand = function () {
   button.style.display = "";
 };
 
+// sets the state, as well as visibility of buttons and text of main button
 var setState = function (s) {
   state = s;
   if (state === STATEDEAL) {
@@ -282,6 +289,9 @@ var setState = function (s) {
   } else if (state === STATECOMPUTERHITSTAND) {
     hideHitStand();
     button.textContent = "Computer";
+  } else if (state === STATERESULT) {
+    hideHitStand();
+    button.textContent = "Results";
   }
 };
 
@@ -291,7 +301,7 @@ var main = function (input) {
   if (state === STATEDEAL) {
     reset();
     deal();
-    output = displayHands(true);
+    output = "<BR><BR>" + displayHands(true);
 
     // if player has bj, player automatically wins
     if (isBlackjack(playerCards)) {
@@ -305,7 +315,7 @@ var main = function (input) {
   } else if (state === STATEPLAYERHITSTAND) {
     if (input.toUpperCase() === "HIT") {
       playerCards.push(deck.pop());
-      output = displayHands(true);
+      output = "<BR><BR>" + displayHands(true);
       if (isBust(playerCards)) {
         output += "<BR><BR>Player busted!<BR><BR>Click [Computer] for Computer's turn";
         setState(STATECOMPUTERHITSTAND);
@@ -314,24 +324,29 @@ var main = function (input) {
       output += "<BR><BR>Player turn: Click [Hit] or [Stand]";
       return output;
     } else if (input.toUpperCase() === "STAND") {
-      output = displayHands(true);
+      output = "<BR><BR>" + displayHands(true);
       output += "<BR><BR>Click [Computer] for Computer's turn";
       setState(STATECOMPUTERHITSTAND);
       return output;
     }
   } else if (state === STATECOMPUTERHITSTAND) {
     var computerValue = getHandValue(computerCards);
-    output += displayComputerHand(true);
-    while (computerValue <= 16) {
+    if (computerValue <= 16) {
       // computer hits while value <=16
       computerCards.push(deck.pop());
-      output += "<BR>Computer hits....";
-      computerValue = getHandValue(computerCards);
-      output += "<BR><BR>" + displayComputerHand(true);
+      output += "Computer hits....<br><br>";
+      output += displayHands(true);
+      output += "<BR><BR>Click [Computer] for Computer's turn";
+    } else {
+      output += "Computer stands...<br><br>";
+      output += displayHands(true);
+      output += "<BR><BR>Click [Results]";
+      setState(STATERESULT);
     }
-    output += "<BR>Computer stands..."; // finally stands in the end when value >16
 
-    output += "<BR><BR>Final Hands<BR>" + displayHands(false);
+    return output;
+  } else if (state === STATERESULT) {
+    output += "Final Hands:<BR><BR>" + displayHands(false);
     output += "<BR><BR>" + gameOutcome();
     setState(STATEDEAL);
     return output;
