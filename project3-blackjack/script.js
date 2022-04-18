@@ -1,3 +1,7 @@
+const STATEDEAL = "DEAL";
+const STATEPLAYERHITSTAND = "STATEPLAYERHITSTAND";
+const STATECOMPUTERHITSTAND = "STATECOMPUTERHITSTAND";
+
 var makeDeck = function () {
   // Initialise an empty deck array
   var cardDeck = [];
@@ -75,13 +79,15 @@ var displayCards = function (cards) {
   return cards.map(cardText).join(", ");
 };
 
+var displayPlayerHand = function () {
+  return `Player hand: ${displayCards(playerCards)}. Value: ${getHandValue(playerCards)}`;
+};
+
+var displayComputerHand = function () {
+  return `Computer hand: ${displayCards(computerCards)}. Value: ${getHandValue(computerCards)}`;
+};
 var displayHands = function () {
-  var text = "";
-  text = `Player hand: ${displayCards(playerCards)}. Value: ${getHandValue(playerCards)}`;
-  text += `<br>Computer hand: ${displayCards(computerCards)}. Value: ${getHandValue(
-    computerCards
-  )}`;
-  return text;
+  return displayPlayerHand() + "<BR>" + displayComputerHand();
 };
 
 var reset = function () {
@@ -104,7 +110,6 @@ var isBlackjack = function (cards) {
   }
 
   // if reaches here, only 2 cards.
-
   // if no ace, return false
   if (cards[0].rank !== 1 && cards[1].rank !== 1) {
     return false;
@@ -112,8 +117,15 @@ var isBlackjack = function (cards) {
 
   // if reach here, means 2 cards, 1 ace.
   // if hand value == 11, means blackjack!
-
-  var value = getHandValue(cards);
+  var value;
+  for (let i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    if (card.rank > 10) {
+      value += 10;
+    } else {
+      value += card.rank;
+    }
+  }
   return value === 11;
 };
 
@@ -133,15 +145,25 @@ var getHandValue = function (cards) {
   return value;
 };
 
+var isBust = function (cards) {
+  var value = getHandValue(cards);
+  return value > 21;
+};
+
 var gameOutcome = function () {
   var playerValue = getHandValue(playerCards);
   var computerValue = getHandValue(computerCards);
-  if ((isBlackjack(playerCards) && isBlackjack(computerCards)) || playerValue === computerValue) {
-    return "It's a draw!";
+
+  if (isBust(computerCards)) {
+    return "Computer busted! Player wins.";
+  } else if (isBust(playerCards)) {
+    return "Player busted! Computer wins.";
   } else if (isBlackjack(playerCards)) {
-    return "Player got Blackjack! Player wins";
+    return "Player got Blackjack! Player wins.";
   } else if (isBlackjack(computerCards)) {
-    return "Computer got Blackjack! Computer wins";
+    return "Computer got Blackjack! Computer wins.";
+  } else if (playerValue === computerValue) {
+    return "It's a draw!";
   } else if (playerValue > computerValue) {
     return "Player wins!";
   } else {
@@ -149,7 +171,7 @@ var gameOutcome = function () {
   }
 };
 
-var state = "deal";
+var state = STATEDEAL;
 var playerCards = [];
 var computerCards = [];
 var deck;
@@ -157,11 +179,49 @@ var deck;
 var main = function (input) {
   var output = "";
 
-  if (state === "deal") {
+  if (state === STATEDEAL) {
     reset();
     deal();
     output = displayHands();
-    output += "<BR>" + gameOutcome();
+    output += "<BR><BR>Player turn. Enter [HIT] or [STAND]";
+    state = STATEPLAYERHITSTAND;
+    return output;
+  } else if (state === STATEPLAYERHITSTAND) {
+    if (input.toUpperCase() === "HIT") {
+      playerCards.push(deck.pop());
+      output = displayHands();
+      if (isBust(playerCards)) {
+        output += "<BR><BR>Player busted!<BR><BR>Hit SUBMIT for Computer's turn";
+        state = STATECOMPUTERHITSTAND;
+        return output;
+      }
+      output += "<BR><BR>Player turn. Enter [HIT] or [STAND]";
+      return output;
+    } else if (input.toUpperCase() === "STAND") {
+      output = displayHands();
+      output += "<BR><BR>Hit SUBMIT for Computer's turn";
+      state = STATECOMPUTERHITSTAND;
+      return output;
+    }
+  } else if (state === STATECOMPUTERHITSTAND) {
+    var computerValue = getHandValue(computerCards);
+    while (computerValue <= 16) {
+      // computer hits
+      if (output !== "") {
+        output += "<BR><BR>";
+      }
+      output += displayComputerHand();
+      computerCards.push(deck.pop());
+      output += "<BR>Computer hits....";
+      computerValue = getHandValue(computerCards);
+    }
+    if (output !== "") {
+      output += "<BR><BR>";
+    }
+    output += displayComputerHand();
+
+    output += "<BR><BR>Final Hands<BR>" + displayHands();
+    output += "<BR><BR>" + gameOutcome();
     return output;
   }
 };
