@@ -1,12 +1,16 @@
 const STATEDEAL = "DEAL";
 const STATEPLAYERHITSTAND = "STATEPLAYERHITSTAND";
 const STATECOMPUTERHITSTAND = "STATECOMPUTERHITSTAND";
+const HEARTS = "Hearts";
+const DIAMONDS = "Diamonds";
+const CLUBS = "Clubs";
+const SPADES = "Spades";
 
 var makeDeck = function () {
   // Initialise an empty deck array
   var cardDeck = [];
   // Initialise an array of the 4 suits in our deck. We will loop over this array.
-  var suits = ["hearts", "diamonds", "clubs", "spades"];
+  var suits = [HEARTS, DIAMONDS, CLUBS, SPADES];
   // Loop over the suits array
   for (var i = 0; i < suits.length; i += 1) {
     // Store the current suit in a variable
@@ -21,13 +25,13 @@ var makeDeck = function () {
 
       // If rank is 1, 11, 12, or 13, set cardName to the ace or face card's name
       if (cardName === 1) {
-        cardName = "ace";
+        cardName = "Ace";
       } else if (cardName === 11) {
-        cardName = "jack";
+        cardName = "Jack";
       } else if (cardName === 12) {
-        cardName = "queen";
+        cardName = "Queen";
       } else if (cardName === 13) {
-        cardName = "king";
+        cardName = "King";
       }
 
       // Create a new card with the current name, suit, and rank
@@ -71,23 +75,80 @@ var shuffleCards = function (cardDeck) {
   return cardDeck;
 };
 
-var cardText = function (card) {
-  return `${card.name} of ${card.suit}`;
+// Source: https://www.krcmic.com/how-to-write-type-playing-card-symbol-emojis-on-keyboard/
+var dictCardEmoji = {
+  "Ace Spades": "&#127137;",
+  "2 Spades": "&#127138;",
+  "3 Spades": "&#127139;",
+  "4 Spades": "&#127140;",
+  "5 Spades": "&#127141;",
+  "6 Spades": "&#127142;",
+  "7 Spades": "&#127143;",
+  "8 Spades": "&#127144;",
+  "9 Spades": "&#127145;",
+  "10 Spades": "&#127146;",
+  "Jack Spades": "&#127147;",
+  "Queen Spades": "&#127149;",
+  "King Spades": "&#127150;",
+  "Ace Hearts": "&#127153;",
+  "2 Hearts": "&#127154;",
+  "3 Hearts": "&#127155;",
+  "4 Hearts": "&#127156;",
+  "5 Hearts": "&#127157;",
+  "6 Hearts": "&#127158;",
+  "7 Hearts": "&#127159;",
+  "8 Hearts": "&#127160;",
+  "9 Hearts": "&#127161;",
+  "10 Hearts": "&#127162;",
+  "Jack Hearts": "&#127163;",
+  "Queen Hearts": "&#127165;",
+  "King Hearts": "&#127166;",
+  "Ace Diamonds": "&#127169;",
+  "2 Diamonds": "&#127170;",
+  "3 Diamonds": "&#127171;",
+  "4 Diamonds": "&#127172;",
+  "5 Diamonds": "&#127173;",
+  "6 Diamonds": "&#127174;",
+  "7 Diamonds": "&#127175;",
+  "8 Diamonds": "&#127176;",
+  "9 Diamonds": "&#127177;",
+  "10 Diamonds": "&#127178;",
+  "Jack Diamonds": "&#127179;",
+  "Queen Diamonds": "&#127181;",
+  "King Diamonds": "&#127182;",
+  "Ace Clubs": "&#127185;",
+  "2 Clubs": "&#127186;",
+  "3 Clubs": "&#127187;",
+  "4 Clubs": "&#127188;",
+  "5 Clubs": "&#127189;",
+  "6 Clubs": "&#127190;",
+  "7 Clubs": "&#127191;",
+  "8 Clubs": "&#127192;",
+  "9 Clubs": "&#127193;",
+  "10 Clubs": "&#127194;",
+  "Jack Clubs": "&#127195;",
+  "Queen Clubs": "&#127197;",
+  "King Clubs": "&#127198;"
+};
+
+var getCardEmoji = function (card) {
+  var text = card.name + " " + card.suit;
+  return `<span style="font-size:100px">${dictCardEmoji[text]}</span>`;
 };
 
 var displayCards = function (cards) {
-  return cards.map(cardText).join(", ");
+  return cards.map(getCardEmoji).join(" ");
 };
 
 var displayPlayerHand = function () {
-  return `Player hand: ${displayCards(playerCards)}. -- ${getHandValue(playerCards)} points`;
+  return `Player hand [${getHandValue(playerCards)} points]:<br>${displayCards(playerCards)}`;
 };
 
 var displayComputerHand = function () {
-  return `Computer hand: ${displayCards(computerCards)}. -- ${getHandValue(computerCards)} points`;
+  return `Computer hand [${getHandValue(computerCards)} points]:<br>${displayCards(computerCards)}`;
 };
 var displayHands = function () {
-  return displayPlayerHand() + "<BR>" + displayComputerHand();
+  return displayPlayerHand() + "<br><BR><BR>" + displayComputerHand();
 };
 
 var reset = function () {
