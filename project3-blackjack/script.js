@@ -103,49 +103,43 @@ var deal = function () {
   computerCards.push(deck.pop());
 };
 
+var hasAce = function (cards) {
+  for (let i = 0; i < cards.length; i++) {
+    if (cards[i].rank === 1) {
+      return true;
+    }
+  }
+  return false;
+};
 var isBlackjack = function (cards) {
-  // if not 2 cards, then not blackjack
-  if (cards.length !== 2) {
-    return false;
-  }
-
-  // if reaches here, only 2 cards.
-  // if no ace, return false
-  if (cards[0].rank !== 1 && cards[1].rank !== 1) {
-    return false;
-  }
-
-  return getHandValue(cards) === 21;
+  return cards.length === 2 && hasAce(cards) && getHandValue(cards) === 21;
 };
 
 var getHandValue = function (cards) {
-  var hasAce = false;
+  var numAces = 0;
 
   var value = 0;
   for (let i = 0; i < cards.length; i++) {
     var card = cards[i];
     if (card.rank === 1) {
-      if (hasAce) {
-        value += 1;
-      } else {
-        hasAce = true;
-        value += 11;
-      }
+      value += 11;
+      numAces++;
     } else if (card.rank > 10) {
       value += 10;
     } else {
       value += card.rank;
     }
   }
-  if (value > 21 && hasAce) {
-    value -= 10; // value = value - 11 + 1:
+
+  while (value > 21 && numAces > 0) {
+    value -= 10;
+    numAces--;
   }
   return value;
 };
 
 var isBust = function (cards) {
-  var value = getHandValue(cards);
-  return value > 21;
+  return getHandValue(cards) > 21;
 };
 
 var gameOutcome = function () {
