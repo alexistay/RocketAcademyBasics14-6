@@ -77,6 +77,7 @@ var shuffleCards = function (cardDeck) {
 
 // Source: https://www.krcmic.com/how-to-write-type-playing-card-symbol-emojis-on-keyboard/
 var dictCardEmoji = {
+  "Backside ": "&#127136;",
   "Ace Spades": "&#127137;",
   "2 Spades": "&#127138;",
   "3 Spades": "&#127139;",
@@ -136,19 +137,33 @@ var getCardEmoji = function (card) {
   return `<span style="font-size:100px">${dictCardEmoji[text]}</span>`;
 };
 
-var displayCards = function (cards) {
-  return cards.map(getCardEmoji).join(" ");
+var displayCards = function (cards, hideFirstCard) {
+  if (!hideFirstCard) {
+    return cards.map(getCardEmoji).join(" ");
+  } else {
+    // hide first card
+    var hiddenCards = JSON.parse(JSON.stringify(cards));
+    hiddenCards[0].name = "Backside";
+    hiddenCards[0].suit = "";
+    return hiddenCards.map(getCardEmoji).join(" ");
+  }
 };
 
 var displayPlayerHand = function () {
-  return `Player hand [${getHandValue(playerCards)} points]:<br>${displayCards(playerCards)}`;
+  return `Player hand [${getHandValue(playerCards)} points]<br>${displayCards(playerCards, false)}`;
 };
 
-var displayComputerHand = function () {
-  return `Computer hand [${getHandValue(computerCards)} points]:<br>${displayCards(computerCards)}`;
+var displayComputerHand = function (hideFirstCard) {
+  var text = `Computer hand:`;
+  if (!hideFirstCard) {
+    text += `[${getHandValue(computerCards)} points]`;
+  }
+  text += `<br>${displayCards(computerCards, hideFirstCard)}`;
+  return text;
 };
-var displayHands = function () {
-  return displayPlayerHand() + "<br><BR><BR>" + displayComputerHand();
+
+var displayHands = function (hideFirstCard) {
+  return displayPlayerHand() + "<br><BR><BR>" + displayComputerHand(hideFirstCard);
 };
 
 var reset = function () {
@@ -276,7 +291,7 @@ var main = function (input) {
   if (state === STATEDEAL) {
     reset();
     deal();
-    output = displayHands();
+    output = displayHands(true);
 
     // if player has bj, player automatically wins
     if (isBlackjack(playerCards)) {
@@ -290,7 +305,7 @@ var main = function (input) {
   } else if (state === STATEPLAYERHITSTAND) {
     if (input.toUpperCase() === "HIT") {
       playerCards.push(deck.pop());
-      output = displayHands();
+      output = displayHands(true);
       if (isBust(playerCards)) {
         output += "<BR><BR>Player busted!<BR><BR>Click [Computer] for Computer's turn";
         setState(STATECOMPUTERHITSTAND);
@@ -299,24 +314,24 @@ var main = function (input) {
       output += "<BR><BR>Player turn: Click [Hit] or [Stand]";
       return output;
     } else if (input.toUpperCase() === "STAND") {
-      output = displayHands();
+      output = displayHands(true);
       output += "<BR><BR>Click [Computer] for Computer's turn";
       setState(STATECOMPUTERHITSTAND);
       return output;
     }
   } else if (state === STATECOMPUTERHITSTAND) {
     var computerValue = getHandValue(computerCards);
-    output += displayComputerHand();
+    output += displayComputerHand(true);
     while (computerValue <= 16) {
       // computer hits while value <=16
       computerCards.push(deck.pop());
       output += "<BR>Computer hits....";
       computerValue = getHandValue(computerCards);
-      output += "<BR><BR>" + displayComputerHand();
+      output += "<BR><BR>" + displayComputerHand(true);
     }
     output += "<BR>Computer stands..."; // finally stands in the end when value >16
 
-    output += "<BR><BR>Final Hands<BR>" + displayHands();
+    output += "<BR><BR>Final Hands<BR>" + displayHands(false);
     output += "<BR><BR>" + gameOutcome();
     setState(STATEDEAL);
     return output;
