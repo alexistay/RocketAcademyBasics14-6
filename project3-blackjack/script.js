@@ -41,8 +41,30 @@ var makeDeck = function () {
   return cardDeck;
 };
 
-var shuffleDeck = function (deck) {
-  return deck;
+// Get a random index ranging from 0 (inclusive) to max (exclusive).
+var getRandomIndex = function (max) {
+  return Math.floor(Math.random() * max);
+};
+
+// Shuffle the elements in the cardDeck array
+var shuffleCards = function (cardDeck) {
+  // Loop over the card deck array once
+  var currentIndex = 0;
+  while (currentIndex < cardDeck.length) {
+    // Select a random index in the deck
+    var randomIndex = getRandomIndex(cardDeck.length);
+    // Select the card that corresponds to randomIndex
+    var randomCard = cardDeck[randomIndex];
+    // Select the card that corresponds to currentIndex
+    var currentCard = cardDeck[currentIndex];
+    // Swap positions of randomCard and currentCard in the deck
+    cardDeck[currentIndex] = randomCard;
+    cardDeck[randomIndex] = currentCard;
+    // Increment currentIndex
+    currentIndex = currentIndex + 1;
+  }
+  // Return the shuffled deck
+  return cardDeck;
 };
 
 var cardText = function (card) {
@@ -54,13 +76,16 @@ var displayCards = function (cards) {
 };
 
 var displayHands = function () {
-  return `Player hand: ${displayCards(playerCards)}<br>Computer hand: ${displayCards(
+  var text = "";
+  text = `Player hand: ${displayCards(playerCards)}. Value: ${getHandValue(playerCards)}`;
+  text += `<br>Computer hand: ${displayCards(computerCards)}. Value: ${getHandValue(
     computerCards
   )}`;
+  return text;
 };
 
 var reset = function () {
-  deck = shuffleDeck(makeDeck());
+  deck = shuffleCards(makeDeck());
   playerCards = [];
   computerCards = [];
 };
@@ -72,16 +97,71 @@ var deal = function () {
   computerCards.push(deck.pop());
 };
 
+var isBlackjack = function (cards) {
+  // if not 2 cards, then not blackjack
+  if (cards.length !== 2) {
+    return false;
+  }
+
+  // if reaches here, only 2 cards.
+
+  // if no ace, return false
+  if (cards[0].rank !== 1 && cards[1].rank !== 1) {
+    return false;
+  }
+
+  // if reach here, means 2 cards, 1 ace.
+  // if hand value == 11, means blackjack!
+
+  var value = getHandValue(cards);
+  return value === 11;
+};
+
+var getHandValue = function (cards) {
+  if (isBlackjack(cards)) {
+    return 21;
+  }
+  var value = 0;
+  for (let i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    if (card.rank > 10) {
+      value += 10;
+    } else {
+      value += card.rank;
+    }
+  }
+  return value;
+};
+
+var gameOutcome = function () {
+  var playerValue = getHandValue(playerCards);
+  var computerValue = getHandValue(computerCards);
+  if ((isBlackjack(playerCards) && isBlackjack(computerCards)) || playerValue === computerValue) {
+    return "It's a draw!";
+  } else if (isBlackjack(playerCards)) {
+    return "Player got Blackjack! Player wins";
+  } else if (isBlackjack(computerCards)) {
+    return "Computer got Blackjack! Computer wins";
+  } else if (playerValue > computerValue) {
+    return "Player wins!";
+  } else {
+    return "Computer wins!";
+  }
+};
+
 var state = "deal";
 var playerCards = [];
 var computerCards = [];
 var deck;
-var output = "";
+
 var main = function (input) {
+  var output = "";
+
   if (state === "deal") {
     reset();
     deal();
     output = displayHands();
+    output += "<BR>" + gameOutcome();
     return output;
   }
 };
