@@ -1,7 +1,7 @@
-const STATEDEAL = "DEAL";
+const STATE_DEAL = "DEAL";
 const STATEPLAYERHITSTAND = "STATEPLAYERHITSTAND";
 const STATECOMPUTERHITSTAND = "STATECOMPUTERHITSTAND";
-const STATERESULT = "STATERESULT";
+const STATEREVEAL = "STATEREVEAL";
 const HEARTS = "Hearts";
 const DIAMONDS = "Diamonds";
 const CLUBS = "Clubs";
@@ -135,7 +135,7 @@ var dictCardEmoji = {
 
 var getCardEmoji = function (card) {
   var text = card.name + " " + card.suit;
-  return `<span style="font-size:100px">${dictCardEmoji[text]}</span>`;
+  return `<span style="font-size:120px">${dictCardEmoji[text]}</span>`;
 };
 
 var displayCards = function (cards, hideFirstCard) {
@@ -164,10 +164,6 @@ var displayComputerHand = function (hideFirstCard) {
   }
   text += `<br>${displayCards(computerCards, hideFirstCard)}`;
   return text;
-};
-
-var displayHands = function (hideFirstCard) {
-  return displayPlayerHand() + "<br><BR><BR>" + displayComputerHand(hideFirstCard);
 };
 
 var reset = function () {
@@ -204,7 +200,7 @@ var getHandValue = function (cards) {
     var card = cards[i];
     if (card.rank === 1) {
       value += 11;
-      numAces++;
+      numAces += 1;
     } else if (card.rank > 10) {
       value += 10;
     } else {
@@ -215,7 +211,7 @@ var getHandValue = function (cards) {
   // if busted, convert aces from 11 to 1 if possible until value <21
   while (value > 21 && numAces > 0) {
     value -= 10;
-    numAces--;
+    numAces -= 1;
   }
   return value;
 };
@@ -245,7 +241,8 @@ var gameOutcome = function () {
   }
 };
 
-var state = STATEDEAL;
+var state = STATE_DEAL;
+var prevState;
 var playerCards = [];
 var computerCards = [];
 var deck;
@@ -281,7 +278,7 @@ var hideHitStand = function () {
 // sets the state, as well as visibility of buttons and text of main button
 var setState = function (s) {
   state = s;
-  if (state === STATEDEAL) {
+  if (state === STATE_DEAL) {
     hideHitStand();
     button.textContent = "Reset";
   } else if (state === STATEPLAYERHITSTAND) {
@@ -289,66 +286,61 @@ var setState = function (s) {
   } else if (state === STATECOMPUTERHITSTAND) {
     hideHitStand();
     button.textContent = "Computer";
-  } else if (state === STATERESULT) {
+  } else if (state === STATEREVEAL) {
     hideHitStand();
-    button.textContent = "Results";
+    button.textContent = "Reveal";
   }
+};
+
+var displayHands = function () {
+  var hideFirstCard = prevState !== STATEREVEAL;
+
+  return `<BR><HR>${displayPlayerHand()} <br><BR><BR> ${displayComputerHand(hideFirstCard)}`;
 };
 
 var main = function (input) {
   var output = "";
-
-  if (state === STATEDEAL) {
+  prevState = state; // store the current state to decide whether to show the computer first card
+  if (state === STATE_DEAL) {
     reset();
     deal();
-    output = "<BR><BR>" + displayHands(true);
 
     // if player has bj, player automatically wins
     if (isBlackjack(playerCards)) {
-      output += "<BR><BR>Player has Blackjack! Player wins!";
-      setState(STATEDEAL);
-      return output;
+      output = "Player has Blackjack! Player wins!";
+      setState(STATE_DEAL);
+    } else {
+      output = "Player: Click [Hit] or [Stand]";
+      setState(STATEPLAYERHITSTAND);
     }
-    output += "<BR><BR>Player turn: Click [Hit] or [Stand]";
-    setState(STATEPLAYERHITSTAND);
-    return output;
   } else if (state === STATEPLAYERHITSTAND) {
     if (input.toUpperCase() === "HIT") {
       playerCards.push(deck.pop());
-      output = "<BR><BR>" + displayHands(true);
+
       if (isBust(playerCards)) {
-        output += "<BR><BR>Player busted!<BR><BR>Click [Computer] for Computer's turn";
+        output = "Player busted! Click [Computer] for Computer's turn";
         setState(STATECOMPUTERHITSTAND);
-        return output;
+      } else {
+        output = "Player: Click [Hit] or [Stand]";
       }
-      output += "<BR><BR>Player turn: Click [Hit] or [Stand]";
-      return output;
     } else if (input.toUpperCase() === "STAND") {
-      output = "<BR><BR>" + displayHands(true);
-      output += "<BR><BR>Click [Computer] for Computer's turn";
+      output += "Click [Computer] for Computer's turn";
       setState(STATECOMPUTERHITSTAND);
-      return output;
     }
   } else if (state === STATECOMPUTERHITSTAND) {
     var computerValue = getHandValue(computerCards);
     if (computerValue <= 16) {
       // computer hits while value <=16
       computerCards.push(deck.pop());
-      output += "Computer hits....<br><br>";
-      output += displayHands(true);
-      output += "<BR><BR>Click [Computer] for Computer's turn";
+      output = "Computer hits... Click [Computer] for Computer's turn";
     } else {
-      output += "Computer stands...<br><br>";
-      output += displayHands(true);
-      output += "<BR><BR>Click [Results]";
-      setState(STATERESULT);
+      output = "Computer stands... Click [Reveal]";
+      setState(STATEREVEAL);
     }
-
-    return output;
-  } else if (state === STATERESULT) {
-    output += "Final Hands:<BR><BR>" + displayHands(false);
-    output += "<BR><BR>" + gameOutcome();
-    setState(STATEDEAL);
-    return output;
+  } else if (state === STATEREVEAL) {
+    output = gameOutcome();
+    setState(STATE_DEAL);
   }
+  output += displayHands();
+  return output;
 };
