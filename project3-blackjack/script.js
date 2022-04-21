@@ -229,19 +229,13 @@ var gameOutcome = function () {
   } else if (isBlackjack(computerCards)) {
     return "Computer got Blackjack! Computer wins.";
   } else if (playerValue === computerValue) {
-    return "It's a draw!";
+    return `Both ${playerValue} points. It's a draw!`;
   } else if (playerValue > computerValue) {
-    return "Player wins!";
+    return `Player ${playerValue} points, Computer ${computerValue} points. Player wins!`;
   } else {
-    return "Computer wins!";
+    return `Player ${playerValue} points, Computer ${computerValue} points. Computer wins!`;
   }
 };
-
-var state = STATE_DEAL;
-var prevState; // this will be current state at the end of the main function.
-var playerCards = [];
-var computerCards = [];
-var deck;
 
 var button = document.querySelector("#output-div");
 var btnHit = document.querySelector("#hit");
@@ -290,9 +284,14 @@ var setState = function (s) {
 
 var displayHands = function () {
   var hideFirstCard = prevState !== STATE_REVEAL;
-
-  return `<BR><HR>${displayPlayerHand()} <br><BR><BR> ${displayComputerHand(hideFirstCard)}`;
+  return `<BR><HR>${displayPlayerHand()} <br><br> ${displayComputerHand(hideFirstCard)}`;
 };
+
+var state = STATE_DEAL;
+var prevState; // this will be current state at the end of the main function.
+var playerCards = [];
+var computerCards = [];
+var deck;
 
 var main = function (input) {
   var output = "";
