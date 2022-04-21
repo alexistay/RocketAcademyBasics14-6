@@ -39,7 +39,7 @@ var makeDeck = function () {
       var card = {
         name: cardName,
         suit: currentSuit,
-        rank: rankCounter > 10 ? 10 : rankCounter === 1 ? 11 : rankCounter
+        rank: rankCounter > 10 ? 10 : rankCounter === 1 ? 11 : rankCounter // if >10 change to 10. if 1 change 11, else no change
       };
       // Add the new card to the deck
       cardDeck.push(card);
