@@ -314,9 +314,7 @@ var main = function (input) {
       setState(STATE_COMPUTER_HIT_STAND);
     }
   } else if (state === STATE_COMPUTER_HIT_STAND) {
-    var computerValue = getHandValue(computerHand);
-    if (computerValue <= 16) {
-      // computer hits while value <=16
+    if (getHandValue(computerHand) <= 16) {
       computerHand.push(deck.pop());
       output = "Computer hits... Click [Computer] for Computer's turn";
     } else {
