@@ -1,7 +1,8 @@
-const STATE_DEAL = "DEAL";
-const STATE_PLAYER_HIT_STAND = "STATEPLAYERHITSTAND";
-const STATE_COMPUTER_HIT_STAND = "STATECOMPUTERHITSTAND";
-const STATE_REVEAL = "STATEREVEAL";
+const STATE_ENTER_PLAYERS = "STATE_ENTER_PLAYERS";
+const STATE_DEAL = "STATE_DEAL";
+const STATE_NEW_PLAYER = "STATE_NEW_PLAYER";
+const STATE_PLAYER_COMPUTER_HIT_STAND = "STATE_PLAYER_COMPUTER_HIT_STAND";
+const STATE_REVEAL = "STATE_REVEAL";
 const HEARTS = "Hearts";
 const DIAMONDS = "Diamonds";
 const CLUBS = "Clubs";
@@ -154,38 +155,61 @@ var displayHand = function (cards, hideFirstCard) {
 };
 
 // returns HTML of a player hand with hand value
-var displayPlayerHand = function () {
-  return `Player hand [${getHandValue(playerHand)} points]<br>${displayHand(playerHand, false)}`;
+var displayPlayerHand = function (player) {
+  return `Player ${player} hand: [${getHandValue(hands[player])} points]<br>${displayHand(
+    hands[player],
+    false
+  )}`;
 };
 
 // returns HTML of computer hand, option to hideFirstCard and shows total value if not hiding first card
 var displayComputerHand = function (hideFirstCard) {
-  var text = `Computer hand:`;
+  var text = `Computer hand: `;
   if (!hideFirstCard) {
     // show points if not hiding first card
-    text += `[${getHandValue(computerHand)} points]`;
+    text += `[${getHandValue(hands[0])} points]`;
   }
-  text += `<br>${displayHand(computerHand, hideFirstCard)}`;
+  text += `<br>${displayHand(hands[0], hideFirstCard)}`;
   return text;
 };
 
 // displays both hands, hiding computer first card depending on the state
 var displayHands = function () {
+  if (state === STATE_ENTER_PLAYERS) {
+    return "";
+  }
   var hideFirstCard = prevState !== STATE_REVEAL;
-  return `<BR><HR>${displayPlayerHand()} <br><br> ${displayComputerHand(hideFirstCard)}`;
+  var html = "<BR><HR>";
+  html += `${displayComputerHand(hideFirstCard)}`;
+  // 1s based! Index 0 is computer
+  for (let i = 1; i <= numPlayers; i++) {
+    html += `<BR><BR> ${displayPlayerHand(i)}`;
+  }
+
+  return html;
 };
 
 var reset = function () {
   deck = shuffleCards(makeDeck());
-  playerHand = [];
-  computerHand = [];
+  hands = [];
+  currentPlayer = 1;
 };
 
 var deal = function () {
-  playerHand.push(deck.pop());
-  computerHand.push(deck.pop());
-  playerHand.push(deck.pop());
-  computerHand.push(deck.pop());
+  // push empty array for computer
+  hands.push([]);
+  // push empty array for each player's hand
+  for (let i = 0; i < numPlayers; i++) {
+    hands.push([]);
+  }
+
+  // for 2 cards
+  for (let cards = 0; cards < 2; cards++) {
+    // deal 1 card for each player or computer
+    for (let i = 0; i < hands.length; i++) {
+      hands[i].push(deck.pop());
+    }
+  }
 };
 
 var hasAce = function (cards) {
@@ -213,24 +237,32 @@ var isBusted = function (cards) {
 };
 
 var getGameOutcome = function () {
-  var playerValue = getHandValue(playerHand);
-  var computerValue = getHandValue(computerHand);
-
-  if (isBusted(computerHand)) {
-    return "Computer busted! Player wins.";
-  } else if (isBusted(playerHand)) {
-    return "Player busted! Computer wins.";
-  } else if (isBlackjack(playerHand)) {
-    return "Player got Blackjack! Player wins.";
-  } else if (isBlackjack(computerHand)) {
-    return "Computer got Blackjack! Computer wins.";
-  } else if (playerValue === computerValue) {
-    return `Both ${playerValue} points. It's a draw!`;
-  } else if (playerValue > computerValue) {
-    return `Player ${playerValue} points, Computer ${computerValue} points. Player wins!`;
-  } else {
-    return `Player ${playerValue} points, Computer ${computerValue} points. Computer wins!`;
+  var results = "";
+  var computerValue = getHandValue(hands[0]);
+  if (isBusted(hands[0])) {
+    return "Computer busted. All players win!";
   }
+  // 1s based! index 0 is computer
+  for (let i = 1; i <= numPlayers; i++) {
+    var playerHand = hands[i];
+    var playerValue = getHandValue(playerHand);
+
+    if (isBusted(playerHand)) {
+      results += `Player ${i} busted! Computer wins.`;
+    } else if (isBlackjack(playerHand)) {
+      results += `Player ${i} got Blackjack! Player wins.`;
+    } else if (isBlackjack(hands[0])) {
+      results += "Computer got Blackjack! Computer wins.";
+    } else if (playerValue === computerValue) {
+      results += `Both Player ${i} and Computer ${playerValue} points. It's a draw!`;
+    } else if (playerValue > computerValue) {
+      results += `Player ${i} ${playerValue} points, Computer ${computerValue} points. Player wins!`;
+    } else {
+      results += `Player ${i} ${playerValue} points, Computer ${computerValue} points. Computer wins!`;
+    }
+    results += "<BR>";
+  }
+  return results;
 };
 
 var button = document.querySelector("#output-div");
@@ -239,7 +271,6 @@ var btnStand = document.querySelector("#stand");
 var inputTextBox = document.querySelector("#input-field");
 
 btnHit.addEventListener("click", function () {
-  console.log("btnhit clicked");
   inputTextBox.value = "HIT";
   button.click();
 });
@@ -255,76 +286,120 @@ var showHitStand = function () {
   button.style.display = "none";
 };
 
-var hideHitStand = function () {
+var hideHitStand = function (buttonText) {
   btnHit.style.display = "none";
   btnStand.style.display = "none";
   button.style.display = "";
+  button.textContent = buttonText;
 };
 
-// sets the state, as well as visibility of buttons and text of main button
-var setState = function (s) {
-  state = s;
+var updateUI = function () {
   if (state === STATE_DEAL) {
-    hideHitStand();
-    button.textContent = "Reset";
-  } else if (state === STATE_PLAYER_HIT_STAND) {
-    showHitStand();
-  } else if (state === STATE_COMPUTER_HIT_STAND) {
-    hideHitStand();
-    button.textContent = "Computer";
+    hideHitStand("Reset");
+  } else if (state === STATE_NEW_PLAYER) {
+    if (!isPlayerTurn()) {
+      hideHitStand("Computer");
+    } else {
+      hideHitStand("Next Player");
+    }
+  } else if (state === STATE_PLAYER_COMPUTER_HIT_STAND) {
+    if (!isPlayerTurn()) {
+      hideHitStand("Computer");
+    } else {
+      showHitStand();
+    }
   } else if (state === STATE_REVEAL) {
-    hideHitStand();
-    button.textContent = "Reveal";
+    hideHitStand("Reveal");
   }
 };
 
-var state = STATE_DEAL;
+var state = STATE_ENTER_PLAYERS;
 var prevState; // this will be current state at the end of the main function.
-var playerHand = [];
-var computerHand = [];
+var hands = [];
 var deck;
+var numPlayers;
+var currentPlayer = 1;
 
+var getNextPlayerOrComputerMessage = function () {
+  var output;
+  if (state === STATE_NEW_PLAYER && isPlayerTurn()) {
+    output = ` Player ${currentPlayer} turn. Click [Next Player]`;
+  } else if (isPlayerTurn()) {
+    output = ` Player ${currentPlayer}: Click [Hit] or [Stand]`;
+  } else {
+    output = " Computer turn. Click [Computer]";
+  }
+  return output;
+};
+
+var nextPlayer = function () {
+  currentPlayer += 1;
+  if (currentPlayer <= numPlayers) {
+    state = STATE_NEW_PLAYER;
+  } else {
+    state = STATE_PLAYER_COMPUTER_HIT_STAND;
+  }
+};
+
+var isPlayerTurn = function () {
+  return currentPlayer <= numPlayers;
+};
 var main = function (input) {
   var output = "";
   prevState = state; // store the current state to decide whether to show the computer first card
+  if (state === STATE_ENTER_PLAYERS) {
+    if (!isNaN(input) && input !== "") {
+      numPlayers = Number(input);
+      state = STATE_DEAL; // go immediately to deal state
+    } else {
+      return "Please enter a valid number for number of players";
+    }
+  }
   if (state === STATE_DEAL) {
     reset();
     deal();
-
-    // if player has bj, player automatically wins
-    if (isBlackjack(playerHand)) {
-      output = "Player has Blackjack! Player wins!";
-      setState(STATE_DEAL);
+    state = STATE_NEW_PLAYER;
+    output = getNextPlayerOrComputerMessage() + "<BR>";
+  } else if (state === STATE_NEW_PLAYER) {
+    if (isPlayerTurn() && isBlackjack(hands[currentPlayer])) {
+      output = `Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
+      nextPlayer();
+      output += getNextPlayerOrComputerMessage();
     } else {
-      output = "Player: Click [Hit] or [Stand]";
-      setState(STATE_PLAYER_HIT_STAND);
+      state = STATE_PLAYER_COMPUTER_HIT_STAND;
+      output = getNextPlayerOrComputerMessage() + "<BR>";
     }
-  } else if (state === STATE_PLAYER_HIT_STAND) {
-    if (input.toUpperCase() === "HIT") {
-      playerHand.push(deck.pop());
-
-      if (isBusted(playerHand)) {
-        output = "Player busted! Click [Computer] for Computer's turn";
-        setState(STATE_COMPUTER_HIT_STAND);
+  } else if (state === STATE_PLAYER_COMPUTER_HIT_STAND) {
+    // computer turn
+    if (!isPlayerTurn()) {
+      if (getHandValue(hands[0]) <= 16) {
+        hands[0].push(deck.pop());
+        output = "Computer hits... <BR>Click [Computer] for Computer's turn";
       } else {
-        output = "Player: Click [Hit] or [Stand]";
+        output = "Computer stands... <BR>Click [Reveal]";
+        state = STATE_REVEAL;
       }
-    } else if (input.toUpperCase() === "STAND") {
-      output = "Click [Computer] for Computer's turn";
-      setState(STATE_COMPUTER_HIT_STAND);
-    }
-  } else if (state === STATE_COMPUTER_HIT_STAND) {
-    if (getHandValue(computerHand) <= 16) {
-      computerHand.push(deck.pop());
-      output = "Computer hits... Click [Computer] for Computer's turn";
     } else {
-      output = "Computer stands... Click [Reveal]";
-      setState(STATE_REVEAL);
+      // player turn
+      if (input.toUpperCase() === "HIT") {
+        hands[currentPlayer].push(deck.pop());
+        if (isBusted(hands[currentPlayer])) {
+          output = `Player ${currentPlayer} busted! <BR>`;
+          nextPlayer();
+          output += getNextPlayerOrComputerMessage();
+        } else {
+          output = getNextPlayerOrComputerMessage() + "<BR>";
+        }
+      } else if (input.toUpperCase() === "STAND") {
+        nextPlayer();
+        output = getNextPlayerOrComputerMessage() + "<BR>";
+      }
     }
   } else if (state === STATE_REVEAL) {
     output = getGameOutcome();
-    setState(STATE_DEAL);
+    state = STATE_DEAL;
   }
   output += displayHands();
+  updateUI();
   return output;
 };
