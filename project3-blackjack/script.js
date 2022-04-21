@@ -1,4 +1,4 @@
-const STATE_ENTER_PLAYERS = "STATE_ENTER_PLAYERS";
+const STATE_ENTER_NUM_PLAYERS = "STATE_ENTER_NUM_PLAYERS";
 const STATE_DEAL = "STATE_DEAL";
 const STATE_NEW_PLAYER = "STATE_NEW_PLAYER";
 const STATE_PLAYER_COMPUTER_HIT_STAND = "STATE_PLAYER_COMPUTER_HIT_STAND";
@@ -173,9 +173,9 @@ var displayComputerHand = function (hideFirstCard) {
   return text;
 };
 
-// displays both hands, hiding computer first card depending on the state
+// displays all hands, hiding computer first card depending on the state
 var displayHands = function () {
-  if (state === STATE_ENTER_PLAYERS) {
+  if (state === STATE_ENTER_NUM_PLAYERS) {
     return "";
   }
   var hideFirstCard = prevState !== STATE_REVEAL;
@@ -192,7 +192,7 @@ var displayHands = function () {
 var reset = function () {
   deck = shuffleCards(makeDeck());
   hands = [];
-  currentPlayer = 1;
+  currentPlayer = 1; //1s based!
 };
 
 var deal = function () {
@@ -286,6 +286,7 @@ var showHitStand = function () {
   button.style.display = "none";
 };
 
+// hides the 2 hit stand buttons, and change the default button text
 var hideHitStand = function (buttonText) {
   btnHit.style.display = "none";
   btnStand.style.display = "none";
@@ -297,23 +298,23 @@ var updateUI = function () {
   if (state === STATE_DEAL) {
     hideHitStand("Reset");
   } else if (state === STATE_NEW_PLAYER) {
-    if (!isPlayerTurn()) {
-      hideHitStand("Computer");
-    } else {
+    if (isPlayerTurn()) {
       hideHitStand("Next Player");
+    } else {
+      hideHitStand("Computer");
     }
   } else if (state === STATE_PLAYER_COMPUTER_HIT_STAND) {
-    if (!isPlayerTurn()) {
-      hideHitStand("Computer");
-    } else {
+    if (isPlayerTurn()) {
       showHitStand();
+    } else {
+      hideHitStand("Computer");
     }
   } else if (state === STATE_REVEAL) {
     hideHitStand("Reveal");
   }
 };
 
-var state = STATE_ENTER_PLAYERS;
+var state = STATE_ENTER_NUM_PLAYERS;
 var prevState; // this will be current state at the end of the main function.
 var hands = [];
 var deck;
@@ -347,7 +348,7 @@ var isPlayerTurn = function () {
 var main = function (input) {
   var output = "";
   prevState = state; // store the current state to decide whether to show the computer first card
-  if (state === STATE_ENTER_PLAYERS) {
+  if (state === STATE_ENTER_NUM_PLAYERS) {
     if (!isNaN(input) && input !== "") {
       numPlayers = Number(input);
       state = STATE_DEAL; // go immediately to deal state
@@ -361,25 +362,18 @@ var main = function (input) {
     state = STATE_NEW_PLAYER;
     output = getNextPlayerOrComputerMessage() + "<BR>";
   } else if (state === STATE_NEW_PLAYER) {
+    // if blackjack, display message and next player
     if (isPlayerTurn() && isBlackjack(hands[currentPlayer])) {
       output = `Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
       nextPlayer();
       output += getNextPlayerOrComputerMessage();
     } else {
+      // ask user to hit or stand
       state = STATE_PLAYER_COMPUTER_HIT_STAND;
       output = getNextPlayerOrComputerMessage() + "<BR>";
     }
   } else if (state === STATE_PLAYER_COMPUTER_HIT_STAND) {
-    // computer turn
-    if (!isPlayerTurn()) {
-      if (getHandValue(hands[0]) <= 16) {
-        hands[0].push(deck.pop());
-        output = "Computer hits... <BR>Click [Computer] for Computer's turn";
-      } else {
-        output = "Computer stands... <BR>Click [Reveal]";
-        state = STATE_REVEAL;
-      }
-    } else {
+    if (isPlayerTurn()) {
       // player turn
       if (input.toUpperCase() === "HIT") {
         hands[currentPlayer].push(deck.pop());
@@ -393,6 +387,15 @@ var main = function (input) {
       } else if (input.toUpperCase() === "STAND") {
         nextPlayer();
         output = getNextPlayerOrComputerMessage() + "<BR>";
+      }
+    } else {
+      // computer turn
+      if (getHandValue(hands[0]) <= 16) {
+        hands[0].push(deck.pop());
+        output = "Computer hits... <BR>Click [Computer] for Computer's next move.";
+      } else {
+        output = "Computer stands... <BR>Click [Reveal]";
+        state = STATE_REVEAL;
       }
     }
   } else if (state === STATE_REVEAL) {
