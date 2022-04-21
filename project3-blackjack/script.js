@@ -39,7 +39,7 @@ var makeDeck = function () {
       var card = {
         name: cardName,
         suit: currentSuit,
-        rank: rankCounter
+        rank: rankCounter > 10 ? 10 : rankCounter === 1 ? 11 : rankCounter
       };
       // Add the new card to the deck
       cardDeck.push(card);
@@ -133,12 +133,13 @@ var dictCardEmoji = {
   "King Clubs": "&#127198;"
 };
 
+// returns HTML of a card emoji
 var getCardEmoji = function (card) {
-  var text = card.name + " " + card.suit;
-  return `<span style="font-size:120px">${dictCardEmoji[text]}</span>`;
+  return `<span style="font-size:120px">${dictCardEmoji[card.name + " " + card.suit]}</span>`;
 };
 
-var displayCards = function (cards, hideFirstCard) {
+// returns HTML of a hand in emojis.
+var displayHand = function (cards, hideFirstCard) {
   if (!hideFirstCard) {
     return cards.map(getCardEmoji).join(" ");
   } else {
@@ -152,35 +153,43 @@ var displayCards = function (cards, hideFirstCard) {
   }
 };
 
+// returns HTML of a player hand with hand value
 var displayPlayerHand = function () {
-  return `Player hand [${getHandValue(playerCards)} points]<br>${displayCards(playerCards, false)}`;
+  return `Player hand [${getHandValue(playerHand)} points]<br>${displayHand(playerHand, false)}`;
 };
 
+// returns HTML of computer hand, option to hideFirstCard and shows total value if not hiding first card
 var displayComputerHand = function (hideFirstCard) {
   var text = `Computer hand:`;
   if (!hideFirstCard) {
     // show points if not hiding first card
-    text += `[${getHandValue(computerCards)} points]`;
+    text += `[${getHandValue(computerHand)} points]`;
   }
-  text += `<br>${displayCards(computerCards, hideFirstCard)}`;
+  text += `<br>${displayHand(computerHand, hideFirstCard)}`;
   return text;
+};
+
+// displays both hands, hiding computer first card depending on the state
+var displayHands = function () {
+  var hideFirstCard = prevState !== STATE_REVEAL;
+  return `<BR><HR>${displayPlayerHand()} <br><br> ${displayComputerHand(hideFirstCard)}`;
 };
 
 var reset = function () {
   deck = shuffleCards(makeDeck());
-  playerCards = [];
-  computerCards = [];
+  playerHand = [];
+  computerHand = [];
 };
 
 var deal = function () {
-  playerCards.push(deck.pop());
-  computerCards.push(deck.pop());
-  playerCards.push(deck.pop());
-  computerCards.push(deck.pop());
+  playerHand.push(deck.pop());
+  computerHand.push(deck.pop());
+  playerHand.push(deck.pop());
+  computerHand.push(deck.pop());
 };
 
 var hasAce = function (cards) {
-  return cards.some((c) => c.rank === 1);
+  return cards.some((c) => c.name === "Ace");
 };
 
 var isBlackjack = function (cards) {
@@ -188,21 +197,8 @@ var isBlackjack = function (cards) {
 };
 
 var getHandValue = function (cards) {
-  var numAces = 0;
-
-  var value = 0;
-  for (let i = 0; i < cards.length; i++) {
-    var card = cards[i];
-    if (card.rank === 1) {
-      // use 11 for ace first. Reduce to 1 only if busted
-      value += 11;
-      numAces += 1;
-    } else if (card.rank > 10) {
-      value += 10;
-    } else {
-      value += card.rank;
-    }
-  }
+  var value = cards.reduce((value, card) => (value += card.rank), 0); // use 11 for ace initially
+  var numAces = cards.filter((c) => c.name === "Ace").length;
 
   // if busted, convert aces from 11 to 1 if possible until value <21
   while (value > 21 && numAces > 0) {
@@ -212,21 +208,21 @@ var getHandValue = function (cards) {
   return value;
 };
 
-var isBust = function (cards) {
+var isBusted = function (cards) {
   return getHandValue(cards) > 21;
 };
 
-var gameOutcome = function () {
-  var playerValue = getHandValue(playerCards);
-  var computerValue = getHandValue(computerCards);
+var getGameOutcome = function () {
+  var playerValue = getHandValue(playerHand);
+  var computerValue = getHandValue(computerHand);
 
-  if (isBust(computerCards)) {
+  if (isBusted(computerHand)) {
     return "Computer busted! Player wins.";
-  } else if (isBust(playerCards)) {
+  } else if (isBusted(playerHand)) {
     return "Player busted! Computer wins.";
-  } else if (isBlackjack(playerCards)) {
+  } else if (isBlackjack(playerHand)) {
     return "Player got Blackjack! Player wins.";
-  } else if (isBlackjack(computerCards)) {
+  } else if (isBlackjack(computerHand)) {
     return "Computer got Blackjack! Computer wins.";
   } else if (playerValue === computerValue) {
     return `Both ${playerValue} points. It's a draw!`;
@@ -282,15 +278,10 @@ var setState = function (s) {
   }
 };
 
-var displayHands = function () {
-  var hideFirstCard = prevState !== STATE_REVEAL;
-  return `<BR><HR>${displayPlayerHand()} <br><br> ${displayComputerHand(hideFirstCard)}`;
-};
-
 var state = STATE_DEAL;
 var prevState; // this will be current state at the end of the main function.
-var playerCards = [];
-var computerCards = [];
+var playerHand = [];
+var computerHand = [];
 var deck;
 
 var main = function (input) {
@@ -301,7 +292,7 @@ var main = function (input) {
     deal();
 
     // if player has bj, player automatically wins
-    if (isBlackjack(playerCards)) {
+    if (isBlackjack(playerHand)) {
       output = "Player has Blackjack! Player wins!";
       setState(STATE_DEAL);
     } else {
@@ -310,30 +301,30 @@ var main = function (input) {
     }
   } else if (state === STATE_PLAYER_HIT_STAND) {
     if (input.toUpperCase() === "HIT") {
-      playerCards.push(deck.pop());
+      playerHand.push(deck.pop());
 
-      if (isBust(playerCards)) {
+      if (isBusted(playerHand)) {
         output = "Player busted! Click [Computer] for Computer's turn";
         setState(STATE_COMPUTER_HIT_STAND);
       } else {
         output = "Player: Click [Hit] or [Stand]";
       }
     } else if (input.toUpperCase() === "STAND") {
-      output += "Click [Computer] for Computer's turn";
+      output = "Click [Computer] for Computer's turn";
       setState(STATE_COMPUTER_HIT_STAND);
     }
   } else if (state === STATE_COMPUTER_HIT_STAND) {
-    var computerValue = getHandValue(computerCards);
+    var computerValue = getHandValue(computerHand);
     if (computerValue <= 16) {
       // computer hits while value <=16
-      computerCards.push(deck.pop());
+      computerHand.push(deck.pop());
       output = "Computer hits... Click [Computer] for Computer's turn";
     } else {
       output = "Computer stands... Click [Reveal]";
       setState(STATE_REVEAL);
     }
   } else if (state === STATE_REVEAL) {
-    output = gameOutcome();
+    output = getGameOutcome();
     setState(STATE_DEAL);
   }
   output += displayHands();
