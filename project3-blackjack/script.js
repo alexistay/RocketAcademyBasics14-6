@@ -162,9 +162,10 @@ var displayPlayerHand = function (player) {
   )}`;
 };
 
-// returns HTML of computer hand, option to hideFirstCard and shows total value if not hiding first card
-var displayComputerHand = function (hideFirstCard) {
+// returns HTML of computer hand, determines whether to hideFirstCard, and shows total value if not hiding first card
+var displayComputerHand = function () {
   var text = `Computer hand: `;
+  var hideFirstCard = currentState !== STATE_REVEAL;
   if (!hideFirstCard) {
     // show points if not hiding first card
     text += `[${getHandValue(hands[0])} points]`;
@@ -173,19 +174,18 @@ var displayComputerHand = function (hideFirstCard) {
   return text;
 };
 
-// displays all hands, hiding computer first card depending on the state
+// displays all hands if state needs it
 var displayHands = function () {
   if (currentState === STATE_ENTER_NUM_PLAYERS) {
     return "";
   }
-  var hideFirstCard = currentState !== STATE_REVEAL;
+
   var html = "<BR><HR>";
-  html += `${displayComputerHand(hideFirstCard)}`;
+  html += `${displayComputerHand()}`;
   // 1s based! Index 0 is computer
   for (let i = 1; i <= numPlayers; i++) {
     html += `<BR><BR> ${displayPlayerHand(i)}`;
   }
-
   return html;
 };
 
@@ -332,7 +332,9 @@ var getPrompt = function () {
   if (nextState === STATE_NEW_PLAYER && isPlayerTurn()) {
     output = ` Player ${currentPlayer} turn. Click [Next Player]`;
   } else if (isPlayerTurn()) {
-    output = ` Player ${currentPlayer}: Click [Hit] or [Stand]`;
+    output = ` ${displayPlayerHand(
+      currentPlayer
+    )}</BR> Player ${currentPlayer}: Click [Hit] or [Stand]`;
   } else {
     output = " Computer turn. Click [Computer]";
   }
@@ -341,9 +343,10 @@ var getPrompt = function () {
 
 var nextPlayer = function () {
   currentPlayer += 1;
-  if (currentPlayer <= numPlayers) {
+  if (isPlayerTurn()) {
     nextState = STATE_NEW_PLAYER;
   } else {
+    // next player is computer
     nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
   }
 };
@@ -370,7 +373,9 @@ var main = function (input) {
   } else if (currentState === STATE_NEW_PLAYER) {
     // if blackjack, display message and next player
     if (isPlayerTurn() && isBlackjack(hands[currentPlayer])) {
-      output = `Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
+      output = `${displayPlayerHand(
+        currentPlayer
+      )} Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
       nextPlayer();
       output += getPrompt();
     } else {
@@ -384,7 +389,7 @@ var main = function (input) {
       if (input.toUpperCase() === "HIT") {
         hands[currentPlayer].push(getCard());
         if (isBusted(hands[currentPlayer])) {
-          output = `Player ${currentPlayer} busted! <BR>`;
+          output = `${displayPlayerHand(currentPlayer)}<BR>Player ${currentPlayer} busted! <BR>`;
           nextPlayer();
           output += getPrompt();
         } else {
@@ -398,9 +403,9 @@ var main = function (input) {
       // computer turn
       if (getHandValue(hands[0]) <= 16) {
         hands[0].push(getCard());
-        output = "Computer hits... <BR>Click [Computer] for Computer's next move.";
+        output = `Computer hits... <BR> ${displayComputerHand()} <BR>Click [Computer] for Computer's next move.`;
       } else {
-        output = "Computer stands... <BR>Click [Reveal]";
+        output = `Computer stands... <BR> ${displayComputerHand()} <BR>Click [Reveal]`;
         nextState = STATE_REVEAL;
       }
     }
