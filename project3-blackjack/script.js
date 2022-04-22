@@ -190,7 +190,6 @@ var displayHands = function () {
 };
 
 var reset = function () {
-  deck = shuffleCards(makeDeck());
   hands = [];
   currentPlayer = 1; //1s based!
 };
@@ -303,7 +302,7 @@ var hideHitStand = function (buttonText) {
 
 var updateUI = function () {
   if (state === STATE_DEAL) {
-    hideHitStand("Reset");
+    hideHitStand("Deal");
   } else if (state === STATE_NEW_PLAYER) {
     if (isPlayerTurn()) {
       hideHitStand("Next Player");
@@ -324,7 +323,7 @@ var updateUI = function () {
 var state = STATE_ENTER_NUM_PLAYERS;
 var prevState; // this will be current state at the end of the main function.
 var hands = [];
-var deck;
+var deck = shuffleCards(makeDeck());
 var numPlayers;
 var currentPlayer = 1;
 
