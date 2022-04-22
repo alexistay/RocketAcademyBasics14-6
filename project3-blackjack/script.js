@@ -175,10 +175,10 @@ var displayComputerHand = function (hideFirstCard) {
 
 // displays all hands, hiding computer first card depending on the state
 var displayHands = function () {
-  if (state === STATE_ENTER_NUM_PLAYERS) {
+  if (currentState === STATE_ENTER_NUM_PLAYERS) {
     return "";
   }
-  var hideFirstCard = prevState !== STATE_REVEAL;
+  var hideFirstCard = currentState !== STATE_REVEAL;
   var html = "<BR><HR>";
   html += `${displayComputerHand(hideFirstCard)}`;
   // 1s based! Index 0 is computer
@@ -301,35 +301,35 @@ var hideHitStand = function (buttonText) {
 };
 
 var updateUI = function () {
-  if (state === STATE_DEAL) {
+  if (nextState === STATE_DEAL) {
     hideHitStand("Deal");
-  } else if (state === STATE_NEW_PLAYER) {
+  } else if (nextState === STATE_NEW_PLAYER) {
     if (isPlayerTurn()) {
       hideHitStand("Next Player");
     } else {
       hideHitStand("Computer");
     }
-  } else if (state === STATE_PLAYER_COMPUTER_HIT_STAND) {
+  } else if (nextState === STATE_PLAYER_COMPUTER_HIT_STAND) {
     if (isPlayerTurn()) {
       showHitStand();
     } else {
       hideHitStand("Computer");
     }
-  } else if (state === STATE_REVEAL) {
+  } else if (nextState === STATE_REVEAL) {
     hideHitStand("Reveal");
   }
 };
 
-var state = STATE_ENTER_NUM_PLAYERS;
-var prevState; // this will be current state at the end of the main function.
+var currentState = STATE_ENTER_NUM_PLAYERS;
+var nextState = STATE_ENTER_NUM_PLAYERS;
 var hands = [];
 var deck = shuffleCards(makeDeck());
 var numPlayers;
 var currentPlayer = 1;
 
-var getNextPlayerOrComputerMessage = function () {
+var getPrompt = function () {
   var output;
-  if (state === STATE_NEW_PLAYER && isPlayerTurn()) {
+  if (nextState === STATE_NEW_PLAYER && isPlayerTurn()) {
     output = ` Player ${currentPlayer} turn. Click [Next Player]`;
   } else if (isPlayerTurn()) {
     output = ` Player ${currentPlayer}: Click [Hit] or [Stand]`;
@@ -342,9 +342,9 @@ var getNextPlayerOrComputerMessage = function () {
 var nextPlayer = function () {
   currentPlayer += 1;
   if (currentPlayer <= numPlayers) {
-    state = STATE_NEW_PLAYER;
+    nextState = STATE_NEW_PLAYER;
   } else {
-    state = STATE_PLAYER_COMPUTER_HIT_STAND;
+    nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
   }
 };
 
@@ -353,32 +353,33 @@ var isPlayerTurn = function () {
 };
 var main = function (input) {
   var output = "";
-  prevState = state; // store the current state to decide whether to show the computer first card
-  if (state === STATE_ENTER_NUM_PLAYERS) {
+  currentState = nextState; // store the current state to decide whether to show the computer first card
+  console.log("State " + currentState);
+  if (currentState === STATE_ENTER_NUM_PLAYERS) {
     if (!isNaN(input) && input !== "") {
       numPlayers = Number(input);
-      state = STATE_DEAL; // go immediately to deal state
+      currentState = STATE_DEAL; // go immediately to deal state
     } else {
       return "Please enter a valid number for number of players";
     }
   }
-  if (state === STATE_DEAL) {
+  if (currentState === STATE_DEAL) {
     reset();
     deal();
-    state = STATE_NEW_PLAYER;
-    output = getNextPlayerOrComputerMessage() + "<BR>";
-  } else if (state === STATE_NEW_PLAYER) {
+    nextState = STATE_NEW_PLAYER;
+    output = getPrompt() + "<BR>";
+  } else if (currentState === STATE_NEW_PLAYER) {
     // if blackjack, display message and next player
     if (isPlayerTurn() && isBlackjack(hands[currentPlayer])) {
       output = `Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
       nextPlayer();
-      output += getNextPlayerOrComputerMessage();
+      output += getPrompt();
     } else {
       // ask user to hit or stand
-      state = STATE_PLAYER_COMPUTER_HIT_STAND;
-      output = getNextPlayerOrComputerMessage() + "<BR>";
+      nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
+      output = getPrompt() + "<BR>";
     }
-  } else if (state === STATE_PLAYER_COMPUTER_HIT_STAND) {
+  } else if (currentState === STATE_PLAYER_COMPUTER_HIT_STAND) {
     if (isPlayerTurn()) {
       // player turn
       if (input.toUpperCase() === "HIT") {
@@ -386,13 +387,13 @@ var main = function (input) {
         if (isBusted(hands[currentPlayer])) {
           output = `Player ${currentPlayer} busted! <BR>`;
           nextPlayer();
-          output += getNextPlayerOrComputerMessage();
+          output += getPrompt();
         } else {
-          output = getNextPlayerOrComputerMessage() + "<BR>";
+          output = getPrompt() + "<BR>";
         }
       } else if (input.toUpperCase() === "STAND") {
         nextPlayer();
-        output = getNextPlayerOrComputerMessage() + "<BR>";
+        output = getPrompt() + "<BR>";
       }
     } else {
       // computer turn
@@ -401,12 +402,12 @@ var main = function (input) {
         output = "Computer hits... <BR>Click [Computer] for Computer's next move.";
       } else {
         output = "Computer stands... <BR>Click [Reveal]";
-        state = STATE_REVEAL;
+        nextState = STATE_REVEAL;
       }
     }
-  } else if (state === STATE_REVEAL) {
+  } else if (currentState === STATE_REVEAL) {
     output = getGameOutcome();
-    state = STATE_DEAL;
+    nextState = STATE_DEAL;
   }
   output += displayHands();
   updateUI();
