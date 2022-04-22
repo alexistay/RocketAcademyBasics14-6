@@ -353,8 +353,7 @@ var isPlayerTurn = function () {
 };
 var main = function (input) {
   var output = "";
-  currentState = nextState; // store the current state to decide whether to show the computer first card
-  console.log("State " + currentState);
+  currentState = nextState;
   if (currentState === STATE_ENTER_NUM_PLAYERS) {
     if (!isNaN(input) && input !== "") {
       numPlayers = Number(input);
