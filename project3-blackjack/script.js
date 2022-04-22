@@ -195,6 +195,13 @@ var reset = function () {
   currentPlayer = 1; //1s based!
 };
 
+var getCard = function () {
+  if (deck.length === 0) {
+    deck = shuffleCards(makeDeck());
+  }
+  return deck.pop();
+};
+
 var deal = function () {
   // push empty array for computer
   hands.push([]);
@@ -207,7 +214,7 @@ var deal = function () {
   for (let cards = 0; cards < 2; cards++) {
     // deal 1 card for each player or computer
     for (let i = 0; i < hands.length; i++) {
-      hands[i].push(deck.pop());
+      hands[i].push(getCard());
     }
   }
 };
@@ -376,7 +383,7 @@ var main = function (input) {
     if (isPlayerTurn()) {
       // player turn
       if (input.toUpperCase() === "HIT") {
-        hands[currentPlayer].push(deck.pop());
+        hands[currentPlayer].push(getCard());
         if (isBusted(hands[currentPlayer])) {
           output = `Player ${currentPlayer} busted! <BR>`;
           nextPlayer();
@@ -391,7 +398,7 @@ var main = function (input) {
     } else {
       // computer turn
       if (getHandValue(hands[0]) <= 16) {
-        hands[0].push(deck.pop());
+        hands[0].push(getCard());
         output = "Computer hits... <BR>Click [Computer] for Computer's next move.";
       } else {
         output = "Computer stands... <BR>Click [Reveal]";
