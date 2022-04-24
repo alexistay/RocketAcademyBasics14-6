@@ -389,7 +389,7 @@ var main = function (input) {
       }
     } else {
       // Computer turn
-      output = `<BR>${displayComputerHand()} <BR>`;
+      output = `<BR>${displayComputerHand()}<BR>`;
       nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
       output += getPrompt();
     }
