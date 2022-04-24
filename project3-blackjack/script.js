@@ -391,7 +391,7 @@ var main = function (input) {
       // Computer turn
       output = `<BR>${displayComputerHand()} <BR>`;
       nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
-      output += getPrompt() + "<BR>";
+      output += getPrompt();
     }
   } else if (currentState === STATE_PLAYER_COMPUTER_HIT_STAND) {
     if (isPlayerTurn()) {
