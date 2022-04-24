@@ -343,12 +343,7 @@ var getPrompt = function () {
 
 var nextPlayer = function () {
   currentPlayer += 1;
-  if (isPlayerTurn()) {
-    nextState = STATE_NEW_PLAYER;
-  } else {
-    // next player is computer
-    nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
-  }
+  nextState = STATE_NEW_PLAYER;
 };
 
 var isPlayerTurn = function () {
@@ -372,16 +367,23 @@ var main = function (input) {
     output = getPrompt() + "<BR>";
   } else if (currentState === STATE_NEW_PLAYER) {
     // if blackjack, display message and next player
-    if (isPlayerTurn() && isBlackjack(hands[currentPlayer])) {
-      output = `${displayPlayerHand(
-        currentPlayer
-      )} <BR> Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
-      nextPlayer();
-      output += getPrompt();
+    if (isPlayerTurn()) {
+      if (isBlackjack(hands[currentPlayer])) {
+        output = `${displayPlayerHand(
+          currentPlayer
+        )} <BR> Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
+        nextPlayer();
+        output += getPrompt();
+      } else {
+        // ask user to hit or stand
+        nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
+        output = getPrompt() + "<BR>";
+      }
     } else {
-      // ask user to hit or stand
+      // Computer turn
+      output = `<BR>${displayComputerHand()} <BR>`;
       nextState = STATE_PLAYER_COMPUTER_HIT_STAND;
-      output = getPrompt() + "<BR>";
+      output += getPrompt() + "<BR>";
     }
   } else if (currentState === STATE_PLAYER_COMPUTER_HIT_STAND) {
     if (isPlayerTurn()) {
