@@ -136,7 +136,15 @@ var dictCardEmoji = {
 
 // returns HTML of a card emoji
 var getCardEmoji = function (card) {
-  return `<span style="font-size:120px">${dictCardEmoji[card.name + " " + card.suit]}</span>`;
+  var color;
+  if (card.suit === HEARTS || card.suit === DIAMONDS) {
+    color = "red";
+  } else {
+    color = "black";
+  }
+  return `<span style="font-size:120px; color:${color}">${
+    dictCardEmoji[card.name + " " + card.suit]
+  }</span>`;
 };
 
 // returns HTML of a hand in emojis.
