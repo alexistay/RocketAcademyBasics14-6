@@ -375,7 +375,7 @@ var main = function (input) {
     if (isPlayerTurn() && isBlackjack(hands[currentPlayer])) {
       output = `${displayPlayerHand(
         currentPlayer
-      )} Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
+      )} <BR> Player ${currentPlayer} has Blackjack! Player wins!<BR>`;
       nextPlayer();
       output += getPrompt();
     } else {
@@ -396,8 +396,9 @@ var main = function (input) {
           output = getPrompt() + "<BR>";
         }
       } else if (input.toUpperCase() === "STAND") {
+        output = `${displayPlayerHand(currentPlayer)}<BR>`;
         nextPlayer();
-        output = getPrompt() + "<BR>";
+        output += getPrompt() + "<BR>";
       }
     } else {
       // computer turn
@@ -410,7 +411,7 @@ var main = function (input) {
       }
     }
   } else if (currentState === STATE_REVEAL) {
-    output = getGameOutcome();
+    output = `<BR> ${displayComputerHand()} <BR>${getGameOutcome()}`;
     nextState = STATE_DEAL;
   }
   output += displayHands();
