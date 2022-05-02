@@ -27,14 +27,10 @@ The <html> element is known as the root element of a HTML page. All other elemen
         </li>
         <li>
           <!-- An <a> tag defines a hyperlink, linking one page to another. The page to link to will be added to the "href" property of the tag. -->
-          <a href="../day01-data-manipulation-and-functions/in-class/index.html"
-            >Day 1</a
-          >
+          <a href="../day01-data-manipulation-and-functions/in-class/index.html">Day 1</a>
         </li>
         <li>
-          <a href="../day02-if-statements-boolean-operators/in-class/index.html"
-            >Day 2</a
-          >
+          <a href="../day02-if-statements-boolean-operators/in-class/index.html">Day 2</a>
         </li>
         <li>
           <a href="../day03-program-state/in-class/index.html">Day 3</a>
@@ -64,15 +60,18 @@ The <html> element is known as the root element of a HTML page. All other elemen
     <!-- The <div> tag defines a division or a section in an HTML document, and is commonly use as a "container" for nested HTML elements. -->
     <div class="container">
       <!-- The <p> tag defines a paragraph element. -->
-      <p>Input:</p>
+      <!--<p>Input:</p>-->
       <!-- The self-closing <input /> tag represents a field for a user to enter input. -->
       <input id="input-field" />
       <!-- The self-closing <br /> tag represents a line break - a line's worth of spacing before dispalying the next element. -->
       <br />
       <!-- The <button> tag represents.. you guessed it! a button. -->
-      <button id="submit-button">Submit</button>
-      <p>Output:</p>
-      <div class="output-div" id="output-div"></div>
+
+      <button id="submit-button">Enter</button>
+      <button id="hit" style="display: none;">Hit</button>
+      <button id="stand" style="display: none;">Stand</button>
+      <!-- <p>Output:</p> -->
+      <div class="output-div" id="output-div">Enter number of players</div>
     </div>
     <!-- Everything below this is incorporating JavaScript programming logic into the webpage. -->
     <!-- The script tag encloses JavaScript syntax for the browser to interpret programtically -->
